@@ -13,6 +13,9 @@ class ClusterUser
   @qconf_exec = @qconf_exec.strip
   
   @scripts_dir = "scripts"
+  
+  # SGE Settings
+  FUNC_TICKETS = 100000
 
   def self.init
     # Compile group list
@@ -20,8 +23,8 @@ class ClusterUser
     
     # Get an LDAP connection
     @ldap = Net::LDAP.new(
-      :host => "mon.genomics.upenn.edu",
-      :port => 389,
+      :host => LDAP_SERVER,
+      :port => LDAP_PORT,
       :auth => {
         :method => :simple,
         :encryption => :simple_tls,
@@ -186,6 +189,10 @@ class ClusterUser
   end
   
   def self.create_sge_users
+    if ClusterUser.groups.size == 0
+      ClusterUser.init
+    end
+    
     exec_script = "#{@scripts_dir}/create_sge_users.sh"
     
     if File.file?(exec_script)
@@ -227,6 +234,10 @@ class ClusterUser
   end
   
   def self.create_sge_projects
+    if ClusterUser.groups.size == 0
+      ClusterUser.init
+    end
+    
     exec_script = "#{@scripts_dir}/create_sge_projects.sh"
     
     if File.file?(exec_script)
@@ -240,7 +251,7 @@ class ClusterUser
       csp_file = File.new("#{@scripts_dir}/#{group_array[0]}.prj", "w")
       csp_file.write("name    #{group_array[0]}\n")
       csp_file.write("oticket 0\n")
-      csp_file.write("fshare  0\n")
+      csp_file.write("fshare  #{FUNC_TICKETS/ClusterUser.groups.size}\n")
       csp_file.write("acl     NONE\n")
       csp_file.write("xacl    NONE\n")
       csp_file.close
@@ -264,6 +275,10 @@ class ClusterUser
   end
   
   def self.create_sge_usersets
+    if ClusterUser.groups.size == 0
+      ClusterUser.init
+    end
+    
     exec_script = "#{@scripts_dir}/create_sge_usersets.sh"
     
     if File.file?(exec_script)
@@ -296,10 +311,10 @@ end
 
 # ClusterUser.create_sge_usersets
 # ClusterUser.delete_sge_usersets
-# ClusterUser.delete_sge_projects
-# ClusterUser.create_sge_projects
-# ClusterUser.create_sge_users
-# ClusterUser.delete_sge_users
-# ClusterUser.create_sge_stree
-# ClusterUser.delete_sge_stree
-# ClusterUser.create_sge_stree
+ClusterUser.delete_sge_projects
+ClusterUser.create_sge_projects
+ClusterUser.create_sge_users
+ClusterUser.delete_sge_users
+ClusterUser.create_sge_stree
+ClusterUser.delete_sge_stree
+ClusterUser.create_sge_stree
