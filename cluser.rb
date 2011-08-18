@@ -7,7 +7,10 @@ require 'net/ldap'
 
 class ClusterUser
   @groups = Hash.new
-  class << self; attr_accessor :groups end
+  @num_users = 0
+  @num_groups = 0
+  
+  class << self; attr_accessor :groups, :num_users, :num_groups end
 
   @qconf_exec = `which qconf`.to_s
   @qconf_exec = @qconf_exec.strip
@@ -69,6 +72,7 @@ class ClusterUser
         groups_array << group_array
       end
     end
+    @num_groups = groups_array.size
     return groups_array
   end
 
@@ -189,6 +193,8 @@ class ClusterUser
   end
   
   def self.create_sge_users
+    @num_users = 0
+  
     if ClusterUser.groups.size == 0
       ClusterUser.init
     end
@@ -214,6 +220,7 @@ class ClusterUser
           csu_file.close
           File.chmod(0600, "#{@scripts_dir}//#{user}.usr")
           csu_script_file.write("#{@qconf_exec} -Auser #{Dir.getwd}/#{@scripts_dir}/#{user}.usr\n")
+          @num_users += 1
         end
       end
     end
@@ -315,6 +322,8 @@ ClusterUser.delete_sge_projects
 ClusterUser.create_sge_projects
 ClusterUser.create_sge_users
 ClusterUser.delete_sge_users
-ClusterUser.create_sge_stree
-ClusterUser.delete_sge_stree
-ClusterUser.create_sge_stree
+#ClusterUser.create_sge_stree
+#ClusterUser.delete_sge_stree
+
+puts "Number of PGFI Cluster Groups: #{ClusterUser.num_groups}"
+puts "Number of PGFI Cluster Users: #{ClusterUser.num_users}"
