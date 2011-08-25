@@ -1,13 +1,24 @@
 #!/usr/bin/env ruby
 
-require 'cluser.rb'
+require 'cluser'
 
 @qconf_exec = `which qconf`.to_s
 @qconf_exec = @qconf_exec.strip
 
 puts "PGFI Cluster CML:\n\n"
 
-if ARGV.size == 2
+if ARGV.size == 1
+  if ARGV[0] == "-gen"
+    ClusterUser.create_sge_usersets
+    ClusterUser.delete_sge_usersets
+    ClusterUser.create_sge_users
+    ClusterUser.delete_sge_users
+    # ClusterUser.delete_sge_projects
+    # ClusterUser.create_sge_projects
+    #ClusterUser.create_sge_stree
+    #ClusterUser.delete_sge_stree
+  end
+elsif ARGV.size == 2
   case ARGV[0]
   when "-au"
     puts "Add user"

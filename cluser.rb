@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'cu-config.rb'
+require 'cu-config'
 
 require 'rubygems'
 require 'net/ldap'
@@ -216,7 +216,7 @@ class ClusterUser
           csu_file.write("oticket         0\n")
           csu_file.write("fshare          0\n")
           csu_file.write("delete_time     0\n")
-          csu_file.write("default_project #{group_array[0]}\n")
+          csu_file.write("default_project NONE\n")
           csu_file.close
           File.chmod(0600, "#{@scripts_dir}//#{user}.usr")
           csu_script_file.write("#{@qconf_exec} -Auser #{Dir.getwd}/#{@scripts_dir}/#{user}.usr\n")
@@ -299,7 +299,7 @@ class ClusterUser
       csu_file = File.new("#{@scripts_dir}/#{group_array[0]}_userset.lst", "w")
       csu_file.write("name    #{group_array[0]}\n")
       csu_file.write("type    DEPT\n")
-      csu_file.write("fshare  0\n")
+      csu_file.write("fshare  #{FUNC_TICKETS/ClusterUser.groups.size}\n")
       csu_file.write("oticket 0\n")
       csu_file.write("entries #{group_array[1]}\n")
       csu_file.write("\n")
