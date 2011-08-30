@@ -7,16 +7,26 @@ require 'cluser'
 
 puts "PGFI Cluster CML:\n\n"
 
+if ClusterUser.num_groups == 0
+  ClusterUser.search_by_group
+end
+
+if ClusterUser.num_users == 0
+  ClusterUser.create_sge_users
+end
+
+puts "Number of PGFI Cluster Groups: #{ClusterUser.num_groups}"
+puts "Number of PGFI Cluster Users: #{ClusterUser.num_users}"
+
 if ARGV.size == 1
   if ARGV[0] == "-gen"
+    puts "Generating current account and group information for SGE..."
     ClusterUser.create_sge_usersets
     ClusterUser.delete_sge_usersets
-    ClusterUser.create_sge_users
     ClusterUser.delete_sge_users
-    # ClusterUser.delete_sge_projects
-    # ClusterUser.create_sge_projects
-    #ClusterUser.create_sge_stree
-    #ClusterUser.delete_sge_stree
+    # Line below is unnecessary since it's needed to calc ClusterUser.num_users
+    # ClusterUser.create_sge_users
+    puts "Completed."
   end
 elsif ARGV.size == 2
   case ARGV[0]

@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-require 'cu-config'
-
 require 'rubygems'
+require 'cu-config'
 require 'net/ldap'
 
 class ClusterUser
@@ -19,6 +18,7 @@ class ClusterUser
   
   # SGE Settings
   FUNC_TICKETS = 100000
+  FUNC_FACTOR = 1.85
 
   def self.init
     # Compile group list
@@ -230,46 +230,46 @@ class ClusterUser
     File.chmod(0700, "#{Dir.getwd}/#{exec_script}")
   end
   
-  def self.delete_sge_projects
-    dsp_file = File.new("#{@scripts_dir}/delete_sge_projects.sh", "w")
-    dsp_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
-    ClusterUser.search_by_group.each do |group_array|
-      dsp_file.write("#{@qconf_exec} -dprj #{group_array[0]}\n")
-    end
-    dsp_file.close
-    File.chmod(0700, "#{@scripts_dir}/delete_sge_projects.sh")
-  end
+  # def self.delete_sge_projects
+  #   dsp_file = File.new("#{@scripts_dir}/delete_sge_projects.sh", "w")
+  #   dsp_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
+  #   ClusterUser.search_by_group.each do |group_array|
+  #     dsp_file.write("#{@qconf_exec} -dprj #{group_array[0]}\n")
+  #   end
+  #   dsp_file.close
+  #   File.chmod(0700, "#{@scripts_dir}/delete_sge_projects.sh")
+  # end
   
-  def self.create_sge_projects
-    if ClusterUser.groups.size == 0
-      ClusterUser.init
-    end
-    
-    exec_script = "#{@scripts_dir}/create_sge_projects.sh"
-    
-    if File.file?(exec_script)
-      File.delete(exec_script)
-    end
-    
-    csp_script_file = File.new(exec_script, "w")    
-    csp_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
-        
-    ClusterUser.search_by_group.each do |group_array|
-      csp_file = File.new("#{@scripts_dir}/#{group_array[0]}.prj", "w")
-      csp_file.write("name    #{group_array[0]}\n")
-      csp_file.write("oticket 0\n")
-      csp_file.write("fshare  #{FUNC_TICKETS/ClusterUser.groups.size}\n")
-      csp_file.write("acl     NONE\n")
-      csp_file.write("xacl    NONE\n")
-      csp_file.close
-      File.chmod(0600, "#{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}.prj")
-      csp_script_file.write("#{@qconf_exec} -Aprj #{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}.prj\n")
-    end
-    
-    csp_script_file.close
-
-    File.chmod(0700, "#{Dir.getwd}/#{exec_script}")   
-  end
+  # def self.create_sge_projects
+  #   if ClusterUser.groups.size == 0
+  #     ClusterUser.init
+  #   end
+  #   
+  #   exec_script = "#{@scripts_dir}/create_sge_projects.sh"
+  #   
+  #   if File.file?(exec_script)
+  #     File.delete(exec_script)
+  #   end
+  #   
+  #   csp_script_file = File.new(exec_script, "w")    
+  #   csp_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
+  #       
+  #   ClusterUser.search_by_group.each do |group_array|
+  #     csp_file = File.new("#{@scripts_dir}/#{group_array[0]}.prj", "w")
+  #     csp_file.write("name    #{group_array[0]}\n")
+  #     csp_file.write("oticket 0\n")
+  #     csp_file.write("fshare  #{FUNC_TICKETS/ClusterUser.groups.size}\n")
+  #     csp_file.write("acl     NONE\n")
+  #     csp_file.write("xacl    NONE\n")
+  #     csp_file.close
+  #     File.chmod(0600, "#{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}.prj")
+  #     csp_script_file.write("#{@qconf_exec} -Aprj #{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}.prj\n")
+  #   end
+  #   
+  #   csp_script_file.close
+  # 
+  #   File.chmod(0700, "#{Dir.getwd}/#{exec_script}")   
+  # end
   
   def self.delete_sge_usersets
     dsu_file = File.new("#{@scripts_dir}/delete_sge_usersets.sh", "w")
@@ -299,7 +299,7 @@ class ClusterUser
       csu_file = File.new("#{@scripts_dir}/#{group_array[0]}_userset.lst", "w")
       csu_file.write("name    #{group_array[0]}\n")
       csu_file.write("type    DEPT\n")
-      csu_file.write("fshare  #{FUNC_TICKETS/ClusterUser.groups.size}\n")
+      csu_file.write("fshare  #{((FUNC_TICKETS * FUNC_FACTOR).floor/ClusterUser.groups.size).floor.to_i}\n")
       csu_file.write("oticket 0\n")
       csu_file.write("entries #{group_array[1]}\n")
       csu_file.write("\n")
@@ -318,12 +318,9 @@ end
 
 # ClusterUser.create_sge_usersets
 # ClusterUser.delete_sge_usersets
-ClusterUser.delete_sge_projects
-ClusterUser.create_sge_projects
-ClusterUser.create_sge_users
-ClusterUser.delete_sge_users
+# ClusterUser.delete_sge_projects
+# ClusterUser.create_sge_projects
+# ClusterUser.create_sge_users
+# ClusterUser.delete_sge_users
 #ClusterUser.create_sge_stree
 #ClusterUser.delete_sge_stree
-
-puts "Number of PGFI Cluster Groups: #{ClusterUser.num_groups}"
-puts "Number of PGFI Cluster Users: #{ClusterUser.num_users}"
