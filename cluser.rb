@@ -312,6 +312,36 @@ class ClusterUser
     
     File.chmod(0700, "#{Dir.getwd}/#{exec_script}")
   end
+
+  def self.next_uid
+    base_uid = 21496
+    base_gid = 3000
+    users = `getent passwd`
+    groups = `getent group`
+    
+    uid_array = Array.new
+    users.each do |line|
+      seg_line = line.split(":")
+      uid_array << seg_line[2].strip.to_i
+    end
+    while uid_array.include?(base_uid)
+      base_uid += 1
+    end
+    
+    gid_array = Array.new
+    groups.each do |line|
+      seg_line = line.split(":")
+      gid_array << seg_line[2].strip.to_i
+    end
+    while gid_array.include?(base_gid)
+      base_gid += 1
+    end 
+    
+    puts "\n"
+    puts "Next available UID for a PGFI cluster user: #{base_uid}"
+    puts "Next available GID for a PGFI cluster group: #{base_gid}"
+    puts "\n"
+  end
   
 end
 

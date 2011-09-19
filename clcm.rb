@@ -27,6 +27,8 @@ if ARGV.size == 1
     # Line below is unnecessary since it's needed to calc ClusterUser.num_users
     # ClusterUser.create_sge_users
     puts "Completed."
+  elsif ARGV[0] == "-next-uid" || ARGV[0] == "-nu"
+    ClusterUser.next_uid
   end
 elsif ARGV.size == 2
   case ARGV[0]
