@@ -353,6 +353,7 @@ class ClusterUser
     master_script_file.write("/root/ClusterUser/#{@scripts_dir}/create_sge_users.sh;\n")
     master_script_file.write("\n")
     master_script_file.close
+    File.chmod(0700, "#{Dir.getwd}/#{master_exec_script}")
   end
   
 end
