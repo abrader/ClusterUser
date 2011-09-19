@@ -35,6 +35,7 @@ if ARGV.size == 1
     ClusterUser.delete_sge_users
     # Line below is unnecessary since it's needed to calc ClusterUser.num_users
     # ClusterUser.create_sge_users
+    ClusterUser.create_master_script
     puts "Completed."
   elsif ARGV[0] == "-next-id" || ARGV[0] == "-nid"
     ClusterUser.next_uid

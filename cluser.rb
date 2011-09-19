@@ -343,6 +343,18 @@ class ClusterUser
     puts "\n"
   end
   
+  def self.create_master_script
+    master_exec_script = "#{@scripts_dir}/commit_sge_changes.sh"
+    master_script_file = File.new(master_exec_script, "w")    
+    master_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
+    master_script_file.write("/root/ClusterUser/#{@scripts_dir}/delete_sge_users.sh;\n")
+    master_script_file.write("/root/ClusterUser/#{@scripts_dir}/delete_sge_usersets.sh;\n")
+    master_script_file.write("/root/ClusterUser/#{@scripts_dir}/create_sge_usersets.sh;\n")
+    master_script_file.write("/root/ClusterUser/#{@scripts_dir}/create_sge_users.sh;\n")
+    master_script_file.write("\n")
+    master_script_file.close
+  end
+  
 end
 
 
