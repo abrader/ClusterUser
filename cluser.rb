@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'cu-config'
+require File.join('/root/ClusterUser', 'cu-config')
 require 'net/ldap'
 
 class ClusterUser
