@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'cluser'
+require File.join('/root/ClusterUser', 'cluser')
+
+
+#require 'cluser'
 
 @qconf_exec = `which qconf`.to_s
 @qconf_exec = @qconf_exec.strip
