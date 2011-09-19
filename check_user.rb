@@ -6,15 +6,10 @@ require 'cluser'
 @qconf_exec = @qconf_exec.strip
 
 usage_msg = "Usage:\n \
--au <username>       = Add cluster user\n \
--du <username>       = Delete cluster user\n \
--ap <project name>   = Add cluster project\n \
--dp <project name>   = Delete cluster project\n \
--as <sharetree file> = Add cluster sharetree policy\n \
--ds <sharetree file> = Delete cluster sharetree policy\n \
--nid                 = Supply next avail user/group id\n"
+-u <username>   = Check for user\n \
+-g <group>       = Check for group\n"
 
-puts "PGFI Cluster User Check:\n\n"
+puts "PGFI Cluster User/Group Check:\n\n"
 
 class CheckUser
   
