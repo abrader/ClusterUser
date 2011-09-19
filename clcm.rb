@@ -5,6 +5,15 @@ require 'cluser'
 @qconf_exec = `which qconf`.to_s
 @qconf_exec = @qconf_exec.strip
 
+usage_msg = "Usage:\n \
+-au <username>       = Add cluster user\n \
+-du <username>       = Delete cluster user\n \
+-ap <project name>   = Add cluster project\n \
+-dp <project name>   = Delete cluster project\n \
+-as <sharetree file> = Add cluster sharetree policy\n \
+-ds <sharetree file> = Delete cluster sharetree policy\n \
+-nid                 = Supply next avail user/group id\n"
+
 puts "PGFI Cluster CML:\n\n"
 
 if ClusterUser.num_groups == 0
@@ -27,8 +36,10 @@ if ARGV.size == 1
     # Line below is unnecessary since it's needed to calc ClusterUser.num_users
     # ClusterUser.create_sge_users
     puts "Completed."
-  elsif ARGV[0] == "-next-uid" || ARGV[0] == "-nu"
+  elsif ARGV[0] == "-next-id" || ARGV[0] == "-nid"
     ClusterUser.next_uid
+  else
+    puts usage_msg
   end
 elsif ARGV.size == 2
   case ARGV[0]
@@ -61,12 +72,6 @@ elsif ARGV.size == 2
     end
   end
 else
-  puts "Usage:\n \
-  -au <username>       = Add cluster user\n \
-  -du <username>       = Delete cluster user\n \
-  -ap <project name>   = Add cluster project\n \
-  -dp <project name>   = Delete cluster project\n \
-  -as <sharetree file> = Add cluster sharetree policy\n \
-  -ds <sharetree file> = Delete cluster sharetree policy\n"
+  puts usage_msg
 end
   
