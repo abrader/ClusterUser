@@ -313,7 +313,7 @@ class ClusterUser
     File.chmod(0700, "#{Dir.getwd}/#{exec_script}")
   end
 
-  def self.next_uid
+  def self.next_id
     base_uid = 21496
     base_gid = 3000
     users = `getent passwd`

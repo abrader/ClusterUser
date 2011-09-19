@@ -38,7 +38,7 @@ if ARGV.size == 1
     ClusterUser.create_master_script
     puts "Completed."
   elsif ARGV[0] == "-next-id" || ARGV[0] == "-nid"
-    ClusterUser.next_uid
+    ClusterUser.next_id
   else
     puts usage_msg
   end
