@@ -3,19 +3,14 @@
 require File.join('/root/ClusterUser', 'cluser')
 
 
-#require 'cluser'
-
-@qconf_exec = `which qconf`.to_s
-@qconf_exec = @qconf_exec.strip
-
-usage_msg = "Usage:\n \
--u <username>   = Check for user\n \
--g <group>      = Check for group\n \
--j <group>      = Number of jobs running within a group\n"
-
 puts "PGFI Cluster User/Group Check:\n\n"
 
 class CheckUser
+
+  @usage_msg = "Usage:\n \
+  -u <username or uid>   = Check for user\n \
+  -g <groupname or gid>      = Check for group\n \
+  -j <groupname or gid>      = Number of SGE jobs running within a group\n"
   
   def self.user_search
     puts "Searching for \"#{ARGV[1]}\"..."
@@ -79,7 +74,7 @@ class CheckUser
       CheckUser.group_jobs
     end
   else
-    puts usage_msg
+    puts @usage_msg
   end
 
 end
