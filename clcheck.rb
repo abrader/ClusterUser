@@ -10,7 +10,8 @@ require File.join('/root/ClusterUser', 'cluser')
 
 usage_msg = "Usage:\n \
 -u <username>   = Check for user\n \
--g <group>       = Check for group\n"
+-g <group>      = Check for group\n \
+-j <group>      = Number of jobs running within a group\n"
 
 puts "PGFI Cluster User/Group Check:\n\n"
 
@@ -37,6 +38,28 @@ class CheckUser
       ClusterUser.next_id
     end
   end
+
+  def self.group_jobs
+    run_jobs = 0
+    pen_jobs = 0
+    users = Array.new
+    result = `getent group #{ARGV[1]}`
+    if result.size == 0
+      puts "Group does not exist."
+      exit
+    end
+
+    res_sp = result.split(":")
+    puts "Number of jobs running under lab/group \"#{res_sp[0]}\"..."
+    u_res = `getent passwd | grep #{res_sp[2]}`
+    u_res.each do |line|
+      uid = line.split(":")[0]
+      run_jobs += `qstat -u \"#{uid}\" | grep -iv qw | wc -l`.to_i
+      pen_jobs += `qstat -u \"#{uid}\" | grep -i qw | wc -l`.to_i
+    end
+    puts "Running SGE jobs: #{run_jobs}"
+    puts "Pending SGE jobs: #{pen_jobs}"
+  end
   
   if ARGV.size == 1
     puts "Searching for \"#{ARGV[0]}\"..."
@@ -52,6 +75,8 @@ class CheckUser
       CheckUser.group_search
     elsif ARGV[0] == "-u"
       CheckUser.user_search
+    elsif ARGV[0] == "-j"
+      CheckUser.group_jobs
     end
   else
     puts usage_msg
