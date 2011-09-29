@@ -298,7 +298,7 @@ class ClusterUser
     ClusterUser.search_by_group.each do |group_array|
       csu_file = File.new("#{@scripts_dir}/#{group_array[0]}_userset.lst", "w")
       csu_file.write("name    #{group_array[0]}\n")
-      csu_file.write("type    DEPT\n")
+      csu_file.write("type    ACL DEPT\n")
       csu_file.write("fshare  #{((FUNC_TICKETS * FUNC_FACTOR).floor/ClusterUser.groups.size).floor.to_i}\n")
       csu_file.write("oticket 0\n")
       csu_file.write("entries #{group_array[1]}\n")
