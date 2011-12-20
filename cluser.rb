@@ -287,15 +287,6 @@ class ClusterUser
       ClusterUser.init
     end
     
-    exec_script = "#{@scripts_dir}/create_sge_usersets.sh"
-    
-    if File.file?(exec_script)
-      File.delete(exec_script)
-    end
-    
-    csu_script_file = File.new(exec_script, "w")    
-    csu_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
-    
     # Remove previously created usersets from scripts dir
     Dir.glob('scripts/*.lst') do |of|
       FileUtils.rm(of)
@@ -309,7 +300,14 @@ class ClusterUser
       File.readlines(dept).each do |line|
         if line =~ /^entries/
           la = line.split(" ")
-          priv_entries = la[1].split(",")
+          if la[1] =~ /,/
+            pe << la[1].split(",")
+            pe.each do |e|
+              priv_entries << e
+            end
+          else
+            priv_entries << la[1]
+          end
         end
       end
     end
@@ -339,9 +337,22 @@ class ClusterUser
         csu_file.write("\n")
         csu_file.close    
         File.chmod(0600, "#{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst")
-        csu_script_file.write("#{@qconf_exec} -Au #{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst\n")
       end
     end
+    
+    exec_script = "#{@scripts_dir}/create_sge_usersets.sh"
+    
+    if File.file?(exec_script)
+      File.delete(exec_script)
+    end
+    
+    csu_script_file = File.new(exec_script, "w")   
+    csu_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
+    
+    Dir.glob('scripts/*.lst').each do |file|
+      file_loc = Dir.pwd + "/" + file
+      csu_script_file.write("#{@qconf_exec} -Au #{file_loc}\n")
+    end 
     
     csu_script_file.close
     
