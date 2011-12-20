@@ -3,6 +3,7 @@
 require 'rubygems'
 require File.join('/root/ClusterUser', 'cu-config')
 require 'net/ldap'
+require 'fileutils'
 
 class ClusterUser
   @groups = Hash.new
@@ -295,17 +296,51 @@ class ClusterUser
     csu_script_file = File.new(exec_script, "w")    
     csu_script_file.write("#!/usr/bin/env bash\n# This is an automatically generated file from the ClusterUser ruby script\n\n")
     
+    # Remove previously created usersets from scripts dir
+    Dir.glob('scripts/*.lst') do |of|
+      FileUtils.rm(of)
+    end
+    
+    priv_entries = Array.new
+    
+    Dir.glob('*.lst').each do |dept|
+      # Copy the modified userset into the scripts dir
+      FileUtils.cp(dept, "scripts/#{dept}")
+      File.readlines(dept).each do |line|
+        if line =~ /^entries/
+          la = line.split(" ")
+          priv_entries = la[1].split(",")
+        end
+      end
+    end
+    
     ClusterUser.search_by_group.each do |group_array|
-      csu_file = File.new("#{@scripts_dir}/#{group_array[0]}_userset.lst", "w")
-      csu_file.write("name    #{group_array[0]}\n")
-      csu_file.write("type    ACL DEPT\n")
-      csu_file.write("fshare  #{((FUNC_TICKETS * FUNC_FACTOR).floor/ClusterUser.groups.size).floor.to_i}\n")
-      csu_file.write("oticket 0\n")
-      csu_file.write("entries #{group_array[1]}\n")
-      csu_file.write("\n")
-      csu_file.close    
-      File.chmod(0600, "#{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst")
-      csu_script_file.write("#{@qconf_exec} -Au #{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst\n")
+      # Remove users who already exist in privledged usersets
+      users = String.new
+      ga = group_array[1].split(",")
+      ga.each do |user|
+        if ! priv_entries.include?(user)
+          users += user
+          users += ","
+        end
+      end
+      
+      users = users[0...-1]
+      
+      #puts "Users: #{users}"
+      
+      if ! users.empty?
+        csu_file = File.new("#{@scripts_dir}/#{group_array[0]}_userset.lst", "w")
+        csu_file.write("name    #{group_array[0]}\n")
+        csu_file.write("type    ACL DEPT\n")
+        csu_file.write("fshare  #{((FUNC_TICKETS * FUNC_FACTOR).floor/ClusterUser.groups.size).floor.to_i}\n")
+        csu_file.write("oticket 0\n")
+        csu_file.write("entries #{users}\n")
+        csu_file.write("\n")
+        csu_file.close    
+        File.chmod(0600, "#{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst")
+        csu_script_file.write("#{@qconf_exec} -Au #{Dir.getwd}/#{@scripts_dir}/#{group_array[0]}_userset.lst\n")
+      end
     end
     
     csu_script_file.close
